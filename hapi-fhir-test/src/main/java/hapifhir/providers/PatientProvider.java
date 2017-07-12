@@ -1,18 +1,33 @@
 package hapifhir.providers;
 
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PatientProvider implements IResourceProvider {
+    private Map<Long, Patient> patients;
+
+    public PatientProvider() {
+        Patient patient = new Patient();
+        patient.setId("0");
+        patient.addName().addGiven("Jane").addSuffix("Doe");
+        patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+        patient.addAddress().setCity("London");
+
+        patients = new HashMap<>();
+        patients.put(0L, patient);
+    }
+
     @Override
     public Class<? extends IBaseResource> getResourceType() {
         return Patient.class;
@@ -20,36 +35,40 @@ public class PatientProvider implements IResourceProvider {
 
     @Read()
     public Patient getPatientById(@IdParam IdType id) {
-        Patient patient = null;
+        return patients.getOrDefault(id.getIdPartAsLong(), null);
+    }
 
-        if (id.getIdPartAsLong() == 1) {
-            patient = new Patient();
-            patient.setId("1");
-            patient.addIdentifier();
-            patient.getIdentifier().get(0).setSystem("urn:hapitest:mrns");
-            patient.getIdentifier().get(0).setValue("00001");
-            patient.addName().addGiven("John").addSuffix("Doe");
-            patient.setGender(Enumerations.AdministrativeGender.MALE);
-            patient.addAddress().setCity("Zürich");
-        } else if (id.getIdPartAsLong() == 2) {
-            patient = new Patient();
-            patient.setId("2");
-            patient.addIdentifier();
-            patient.getIdentifier().get(0).setSystem("urn:hapitest:mrns");
-            patient.getIdentifier().get(0).setValue("00002");
-            patient.addName().addGiven("Jane").addSuffix("Doe");
-            patient.setGender(Enumerations.AdministrativeGender.FEMALE);
-            patient.addAddress().setCity("London");
+    @Create
+    public MethodOutcome createPatient(@ResourceParam Patient patient) {
+        IdType id = new IdType(patients.size());
+        patient.setId(id);
+        patients.put(id.getIdPartAsLong(), patient);
+
+        MethodOutcome outcome = new MethodOutcome();
+        outcome.setId(id);
+        return outcome;
+    }
+
+    @Update
+    public MethodOutcome update(@IdParam IdType id, @ResourceParam Patient patient) {
+        patients.put(id.getIdPartAsLong(), patient);
+        return new MethodOutcome();
+    }
+
+    @Delete()
+    public void deletePatient(@IdParam IdType id) {
+        // .. Delete the patient ..
+        if (!patients.containsKey(id.getIdPartAsLong())) {
+            throw new ResourceNotFoundException("Unknown version");
         }
 
-        return patient;
+        patients.remove(id.getIdPartAsLong());
     }
 
     @Search()
     public List<Patient> getAllPatients() {
-        List<Patient> patients = new ArrayList<>();
-        for (int i = 1; i <= 2; i++)
-            patients.add(getPatientById(new IdType(i)));
-        return patients;
+        List<Patient> list = new ArrayList<>();
+        list.addAll(patients.values());
+        return list;
     }
 }
