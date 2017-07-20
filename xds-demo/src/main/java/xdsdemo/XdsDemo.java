@@ -6,6 +6,7 @@ import org.ehealth_connector.common.Identificator;
 import org.ehealth_connector.common.enums.Confidentiality;
 import org.ehealth_connector.common.enums.LanguageCode;
 import org.ehealth_connector.communication.*;
+import org.ehealth_connector.communication.ch.ConvenienceCommunicationCh;
 import org.ehealth_connector.communication.xd.storedquery.FindDocumentsQuery;
 import org.ehealth_connector.communication.xd.storedquery.FindFoldersStoredQuery;
 import org.ehealth_connector.communication.xd.storedquery.GetDocumentsQuery;
@@ -29,19 +30,23 @@ public class XdsDemo {
     public static final String SIM_REGISTRY = "http://localhost:8888/xdstools4/sim/default__ahdis/reg/rb";
     public static final String SIM_RETRIEVE = "http://localhost:8888/xdstools4/sim/default__ahdis/rep/ret";
 
+    public static final String PJA_REPOSITORY = "http://ehealthsuisse.ihe-europe.net:8481/xdstools4/sim/default__test/rep/prb";
+    public static final String PJA_REGISTRY = "http://ehealthsuisse.ihe-europe.net:8481/xdstools4/sim/default__test/reg/sq";
+    public static final String PJA_RETRIEVE = "http://ehealthsuisse.ihe-europe.net:8481/xdstools4/sim/default__test/rep/ret";
+
     public static final String NIST_REPOSITORY = "http://ihexds.nist.gov:12090/tf6/services/xdsrepositoryb";
     public static final String NIST_REGISTRY = "http://ihexds.nist.gov:12090/tf6/services/xdsregistryb";
     public static final String NIST_RETRIEVE = "http://ihexds.nist.gov:12090/tf6/services/xdsrepositoryb";
 
-    public static final String REPOSITORY = NIST_REPOSITORY;
-    public static final String REGISTRY = NIST_REGISTRY;
-    //public static final String RETRIEVE = NIST_RETRIEVE;
+    public static final String REPOSITORY = PJA_REPOSITORY;
+    public static final String REGISTRY = PJA_REGISTRY;
+    public static final String RETRIEVE = PJA_RETRIEVE;
 
     public static final String ORG_ID = "1.3.6.1.4.1.21367.101";
 
     private static final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
-    private static final Identificator patientId = new Identificator("1.3.6.1.4.1.21367.2005.13.20.3000", "018c5fcd5262424");
+    private static final Identificator patientId = new Identificator("1.3.6.1.4.1.21367.2005.13.20.1000", "ec193926d6ea4aa");
 
     public static void main(String[] args) {
         doDemo();
@@ -56,7 +61,7 @@ public class XdsDemo {
             // Destination retrieve = new Destination(ORG_ID, new URI(RETRIEVE));
             Destination registry = new Destination(ORG_ID, new URI(REGISTRY));
             AffinityDomain domain = new AffinityDomain(null, registry, repository);
-            ConvenienceCommunication comm = new ConvenienceCommunication(domain);
+            ConvenienceCommunicationCh comm = new ConvenienceCommunicationCh(domain);
 
             //uploadDocument(comm);
             queryDocuments(comm);
@@ -67,9 +72,8 @@ public class XdsDemo {
         }
     }
 
-    public static void queryDocuments(ConvenienceCommunication comm) throws URISyntaxException, IOException {
+    public static void queryDocuments(ConvenienceCommunicationCh comm) throws URISyntaxException, IOException {
         System.out.println("queryDocuments()");
-
         // Request folders
         FindFoldersStoredQuery foldersStoredQuery = new FindFoldersStoredQuery(patientId, AvailabilityStatusType.APPROVED_LITERAL);
         XDSQueryResponseType result = comm.queryFolders(foldersStoredQuery);
@@ -120,10 +124,10 @@ public class XdsDemo {
             System.out.println("\t\tLanguage: " + doc.getLanguageCode());
             System.out.println("\t\tCreation Time: " + doc.getCreationTime());
 
-            if (doc.getMimeType().equals("text/xml")) {
+            if (doc.getMimeType().startsWith("text/")) {
                 DocumentRequest request = new DocumentRequest(
                         doc.getRepositoryUniqueId(),
-                        comm.getAffinityDomain().getRepositoryDestination().getUri(),
+                        new URI(RETRIEVE),
                         doc.getUniqueId());
 
                 XDSRetrieveResponseType response = comm.retrieveDocument(request);
@@ -136,11 +140,12 @@ public class XdsDemo {
                 InputStream docIS = document.getStream();
                 IOUtils.copy(docIS, System.out);
                 System.out.println("---------------");
+                System.out.println();
             }
         }
     }
 
-    public static void uploadDocument(ConvenienceCommunication comm) throws Exception {
+    public static void uploadDocument(ConvenienceCommunicationCh comm) throws Exception {
         System.out.println("uploadDocument()");
 
         // Create new folder
