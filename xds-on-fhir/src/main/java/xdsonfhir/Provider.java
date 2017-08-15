@@ -49,7 +49,9 @@ public class Provider {
         - Must contain at least one DocumentReference (referenced by the Manifest)
         - Each DocumentReference must contain an attachment
          */
+        System.out.println("Received Bundle:");
         printXml(bundle);
+        System.out.println("===========");
         DocumentManifest manifest = null;
         List<DocumentReference> allReferences = new ArrayList<>();
         for (Bundle.BundleEntryComponent entry: bundle.getEntry()) {

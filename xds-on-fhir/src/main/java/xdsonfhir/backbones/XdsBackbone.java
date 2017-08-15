@@ -134,6 +134,7 @@ public class XdsBackbone implements Backbone {
 
             metadata.setDestinationPatientId(patientId);
             metadata.setSourcePatientId(patientId); // TODO: set source or destination or both?
+
             log.info("\tLanguage: " + attachment.getLanguage());
             metadata.setCodedLanguage(attachment.getLanguage());
             metadata.setCreationTime(document.getIndexed());
@@ -141,12 +142,12 @@ public class XdsBackbone implements Backbone {
 
             // TODO: Get all this data from supplied DocumentReference
             metadata.setTypeCode(new Code("2.16.840.1.113883.6.1", "34133-9", "Summarization of Episode Note"));
-            metadata.setTypeCode(new Code("2.16.840.1.113883.6.1", "34133-9", "Summarization of Episode Note"));
             metadata.setFormatCode(new Code("1.3.6.1.4.1.19376.1.2.3", "urn:ihe:iti:xds-sd:pdf:2008","1.3.6.1.4.1.19376.1.2.20 (Scanned Document)"));
             metadata.setClassCode(new Code("1.3.6.1.4.1.21367.100.1", "DEMO-Consult", "Consultation"));
             metadata.setHealthcareFacilityTypeCode(new Code("2.16.840.1.113883.5.11", "AMB", "Ambulance"));
             metadata.setPracticeSettingCode(new Code("2.16.840.1.113883.6.96", "394802001", "General Medicine"));
             metadata.addConfidentialityCode(Confidentiality.NORMAL);
+            // TODO: availabilityStatus?
 
             metadata.setTitle(document.getDescription());
         }
@@ -159,7 +160,25 @@ public class XdsBackbone implements Backbone {
             submissionSetMetadata.setAvailabilityStatus(AvailabilityStatusType.DEPRECATED_LITERAL);
 
 
-        // TODO: copy data from manifest to submissionSetMetadata
+        String pid = manifest.getSubject().getReference();
+        Identificator patientId = stringToPatientId(pid);
+        if (patientId == null) {
+            log.info("Malformed Patiend ID " + pid);
+            throw new InvalidRequestException("Malformed Patiend ID " + pid);
+        }
+        submissionSetMetadata.setDestinationPatientId(patientId);
+
+        // Commented out because it throws this error:
+        // Input did not validate against schema:
+        // Error: cvc-complex-type.4: Attribute 'value' must appear on element 'rim:LocalizedString'.
+        //submissionSetMetadata.setTitle(manifest.getDescription());
+
+        submissionSetMetadata.setSourceId(manifest.getSource());
+
+        // TODO:
+        // - submissionSetMetadata.setContentTypeCode(); from: manifest.getType()
+        // - submissionSetMetadata.setComments(); from: manifest.getText() ???
+        // - submissionSetMetadata.setAuthor(); from manifest.getAuthor();
 
         try {
             XDSResponseType result = comm.submit(submissionSetMetadata);
