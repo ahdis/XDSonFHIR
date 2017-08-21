@@ -12,6 +12,13 @@
         <mainClass>xdsonfhir.XdsOnFhir</mainClass>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>suisse-open-exchange.healthcare</id>
+            <url>https://projects.suisse-open-exchange.healthcare/artifactory/snapshots</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- Embedded Tomcat Sever -->
         <dependency>
@@ -32,8 +39,8 @@
         </dependency>
         <!-- eHealthConnector -->
         <dependency>
-            <groupId>org.ehealth_connector.communication.ch</groupId>
-            <artifactId>ehealth_connector-communication-ch</artifactId>
+            <groupId>org.ehealth_connector</groupId>
+            <artifactId>ehealth_connector-fatjar-ch</artifactId>
             <version>1.5-SNAPSHOT</version>
         </dependency>
         <!-- Spring Framework for CORS -->

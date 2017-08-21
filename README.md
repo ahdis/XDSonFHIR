@@ -23,9 +23,7 @@ transaction Bundle, before calling the *Backbone’s* addDocument() method:
 
 ## How to run
 
-You will need the *eHealthConnector* library in your Maven cache. See the project's [https://sourceforge.net/p/ehealthconnector/wiki/Building%20the%20eHealth%20Connector/](documentation) for instructions on how to compile it.
-
-Then, compile this projects:
+Compile this project:
 ```bash
 cd xds-on-fhir
 mvn clean install
