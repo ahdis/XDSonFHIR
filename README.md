@@ -34,6 +34,8 @@ And run it:
 java -jar target/xds-on-fhir-1.0-SNAPSHOT.jar
 ```
 
+Check that the server is running by opening [http://localhost:8080/fhir/status] in your browser.
+
 # Customizing
 
 By default, the embedded Tomcat server starts on port 8080, it can be changed in `XdsOnFhir.java`.
