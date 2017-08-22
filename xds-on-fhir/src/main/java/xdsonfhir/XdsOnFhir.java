@@ -70,8 +70,11 @@ public class XdsOnFhir extends RestfulServer {
         config.addExposedHeader("Content-Location");
         config.setAllowedMethods(Arrays.asList("GET", "POST"));
 
-        CorsInterceptor interceptor = new CorsInterceptor(config);
-        registerInterceptor(interceptor);
+        CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+        registerInterceptor(corsInterceptor);
+
+        StatusInterceptor statusInterceptor = new StatusInterceptor();
+        registerInterceptor(statusInterceptor);
 
         try {
             Backbone backbone = new XdsBackbone(
