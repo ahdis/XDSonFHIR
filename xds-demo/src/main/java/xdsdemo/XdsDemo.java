@@ -7,14 +7,12 @@ import org.ehealth_connector.common.enums.Confidentiality;
 import org.ehealth_connector.common.enums.LanguageCode;
 import org.ehealth_connector.communication.*;
 import org.ehealth_connector.communication.ch.ConvenienceCommunicationCh;
-import org.ehealth_connector.communication.xd.storedquery.FindDocumentsQuery;
-import org.ehealth_connector.communication.xd.storedquery.FindFoldersStoredQuery;
-import org.ehealth_connector.communication.xd.storedquery.GetDocumentsQuery;
-import org.ehealth_connector.communication.xd.storedquery.GetFolderAndContentsQuery;
+import org.ehealth_connector.communication.xd.storedquery.*;
 import org.openhealthtools.ihe.xds.document.DocumentDescriptor;
 import org.openhealthtools.ihe.xds.document.XDSDocument;
 import org.openhealthtools.ihe.xds.metadata.AvailabilityStatusType;
 import org.openhealthtools.ihe.xds.metadata.DocumentEntryType;
+import org.openhealthtools.ihe.xds.metadata.LocalizedStringType;
 import org.openhealthtools.ihe.xds.response.*;
 
 import java.io.IOException;
@@ -38,15 +36,16 @@ public class XdsDemo {
     public static final String NIST_REGISTRY = "http://ihexds.nist.gov:12090/tf6/services/xdsregistryb";
     public static final String NIST_RETRIEVE = "http://ihexds.nist.gov:12090/tf6/services/xdsrepositoryb";
 
-    public static final String REPOSITORY = PJA_REPOSITORY;
-    public static final String REGISTRY = PJA_REGISTRY;
-    public static final String RETRIEVE = PJA_RETRIEVE;
+    public static final String REPOSITORY = NIST_REPOSITORY;
+    public static final String REGISTRY = NIST_REGISTRY;
+    public static final String RETRIEVE = NIST_RETRIEVE;
 
     public static final String ORG_ID = "1.3.6.1.4.1.21367.101";
 
     private static final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
-    private static final Identificator patientId = new Identificator("1.3.6.1.4.1.21367.2005.13.20.1000", "ec193926d6ea4aa");
+    //private static final Identificator patientId = new Identificator("1.3.6.1.4.1.21367.2005.13.20.1000", "ec193926d6ea4aa"); //"ec193926d6ea4aa^^^&1.3.6.1.4.1.21367.2005.13.20.1000&ISO"
+    private static final Identificator patientId = new Identificator("1.3.6.1.4.1.21367.2005.13.20.1000", "ed7e26f5887e4c2"); //"ed7e26f5887e4c2^^^&1.3.6.1.4.1.21367.2005.13.20.1000&ISO"
 
     public static void main(String[] args) {
         doDemo();
@@ -81,19 +80,19 @@ public class XdsDemo {
         System.out.println("Query for folders references. Response status: " + result.getStatus().getName());
         System.out.println("" + result.getFolderResponses().size() + " Folders found for patient " +patientId.getRoot()+"/"+patientId.getExtension());
 
-        if (false) {
-            for (FolderResponseType folder : result.getFolderResponses()) {
-                if (folder.getFolder() != null) {
-                    System.out.println("- Folder UUID: " + folder.getFolder().getEntryUUID());
+        /*
+        for (FolderResponseType folder : result.getFolderResponses()) {
+            if (folder.getFolder() != null) {
+                System.out.println("- Folder UUID: " + folder.getFolder().getEntryUUID());
 
-                    GetFolderAndContentsQuery folderStoredQuery = new GetFolderAndContentsQuery(folder.getFolder().getEntryUUID(), true, null, null);
-                    result = comm.queryDocuments(folderStoredQuery);
-                    System.out.println("\tQuery for folder. Response status: " + result.getStatus().getName());
-                    System.out.println("\t\tHas " + result.getAssociations().size() + " associations");
-                    System.out.println("\t\tHas " + result.getDocumentEntryResponses().size() + " document entries");
-                }
+                GetFolderAndContentsQuery folderStoredQuery = new GetFolderAndContentsQuery(folder.getFolder().getEntryUUID(), true, null, null);
+                result = comm.queryDocuments(folderStoredQuery);
+                System.out.println("\tQuery for folder. Response status: " + result.getStatus().getName());
+                System.out.println("\t\tHas " + result.getAssociations().size() + " associations");
+                System.out.println("\t\tHas " + result.getDocumentEntryResponses().size() + " document entries");
             }
         }
+        */
 
         // Request all document references
         FindDocumentsQuery findDocumentsQuery = new FindDocumentsQuery(patientId, AvailabilityStatusType.APPROVED_LITERAL);
@@ -120,6 +119,10 @@ public class XdsDemo {
         for (DocumentEntryResponseType res : result.getDocumentEntryResponses()) {
             DocumentEntryType doc = res.getDocumentEntry();
             System.out.println("\t- " + doc.getUniqueId());
+            if (doc.getTitle().getLocalizedString().size() > 0) {
+                LocalizedStringType title = (LocalizedStringType) doc.getTitle().getLocalizedString().get(0);
+                System.out.println("\t\tTitle: " + title.getValue());
+            }
             System.out.println("\t\tType: " + doc.getMimeType());
             System.out.println("\t\tLanguage: " + doc.getLanguageCode());
             System.out.println("\t\tCreation Time: " + doc.getCreationTime());
@@ -149,6 +152,7 @@ public class XdsDemo {
         System.out.println("uploadDocument()");
 
         // Create new folder
+        /*
         FolderMetadata folderMeta = comm.addFolder(new Code("2.16.840.1.113883.6.1", "34133-9", "Summarization of Episode Note"));
 
         folderMeta.setAvailabilityStatus(AvailabilityStatusType.APPROVED_LITERAL);
@@ -157,6 +161,7 @@ public class XdsDemo {
         folderMeta.setComments("This is a Folder");
         folderMeta.setPatientId(patientId);
         folderMeta.setTitle("Folder for Patient " + patientId.getExtension());
+        */
 
         // Create new document, with attached XML file
         DocumentMetadata metaData = comm.addDocument(DocumentDescriptor.XML, "test.xml");
@@ -173,10 +178,10 @@ public class XdsDemo {
         metaData.setHealthcareFacilityTypeCode(new Code("2.16.840.1.113883.5.11", "AMB", "Ambulance"));
         metaData.setPracticeSettingCode(new Code("2.16.840.1.113883.6.96", "394802001", "General Medicine"));
         metaData.addConfidentialityCode(Confidentiality.NORMAL);
-        metaData.setTitle("Informed Consent");
+        metaData.setTitle("Test Document");
 
         // Put this document in the folder
-        comm.addDocumentToFolder(metaData.getEntryUUID(), folderMeta.getEntryUUID());
+        //comm.addDocumentToFolder(metaData.getEntryUUID(), folderMeta.getEntryUUID());
 
         XDSResponseType result = comm.submit();
         printXdsResponse(result);
