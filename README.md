@@ -34,7 +34,7 @@ And run it:
 java -jar target/xds-on-fhir-1.0-SNAPSHOT.jar
 ```
 
-Check that the server is running by opening [http://localhost:8080/fhir/status] in your browser.
+Check that the server is running by opening http://localhost:8080/fhir/status in your browser.
 
 # Customizing
 
