@@ -9,7 +9,7 @@ import java.io.IOException;
 public class StatusInterceptor extends InterceptorAdapter {
     @Override
     public boolean incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse) {
-        if (!theRequest.getPathInfo().equalsIgnoreCase("/status"))
+        if (!"/status".equalsIgnoreCase(theRequest.getPathInfo()))
             return true;
 
         theResponse.setStatus(200);
