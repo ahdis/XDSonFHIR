@@ -16,6 +16,7 @@ import org.ehealth_connector.communication.xd.storedquery.GetDocumentsQuery;
 import org.hl7.fhir.dstu3.model.*;
 import org.openhealthtools.ihe.xds.document.DocumentDescriptor;
 import org.openhealthtools.ihe.xds.metadata.AvailabilityStatusType;
+import org.openhealthtools.ihe.xds.metadata.CodedMetadataType;
 import org.openhealthtools.ihe.xds.metadata.DocumentEntryType;
 import org.openhealthtools.ihe.xds.metadata.LocalizedStringType;
 import org.openhealthtools.ihe.xds.response.*;
@@ -142,11 +143,16 @@ public class XdsBackbone implements Backbone {
 
             // TODO: Get all this data from supplied DocumentReference
             metadata.setTypeCode(new Code("2.16.840.1.113883.6.1", "34133-9", "Summarization of Episode Note"));
-            metadata.setFormatCode(new Code("1.3.6.1.4.1.19376.1.2.3", "urn:ihe:iti:xds-sd:pdf:2008","1.3.6.1.4.1.19376.1.2.20 (Scanned Document)"));
+            metadata.setFormatCode(new Code("1.3.6.1.4.1.19376.1.2.3", "urn:ihe:iti:xds-sd:pdf:2008", "1.3.6.1.4.1.19376.1.2.20 (Scanned Document)"));
             metadata.setClassCode(new Code("1.3.6.1.4.1.21367.100.1", "DEMO-Consult", "Consultation"));
             metadata.setHealthcareFacilityTypeCode(new Code("2.16.840.1.113883.5.11", "AMB", "Ambulance"));
             metadata.setPracticeSettingCode(new Code("2.16.840.1.113883.6.96", "394802001", "General Medicine"));
             metadata.addConfidentialityCode(Confidentiality.NORMAL);
+
+            // TODO: Get all this data from supplied DocumentReference
+            // TODO null check
+            //metadata.setTypeCode(codeableConceptToCode(document.getType()));
+            //metadata.setClassCode(codeableConceptToCode(document.getClass_()));
             // TODO: availabilityStatus?
 
             metadata.setTitle(document.getDescription());
@@ -176,9 +182,9 @@ public class XdsBackbone implements Backbone {
         submissionSetMetadata.setSourceId(manifest.getSource());
 
         // TODO:
-        // - submissionSetMetadata.setContentTypeCode(); from: manifest.getType()
-        // - submissionSetMetadata.setComments(); from: manifest.getText() ???
         // - submissionSetMetadata.setAuthor(); from manifest.getAuthor();
+        //submissionSetMetadata.setContentTypeCode(codeableConceptToCode(manifest.getType()));
+        //submissionSetMetadata.setComments(manifest.getText().toString());
 
         try {
             XDSResponseType result = comm.submit(submissionSetMetadata);
@@ -192,6 +198,22 @@ public class XdsBackbone implements Backbone {
             log.error("Error submitting document", e);
             throw new InternalErrorException("Error submitting document", e);
         }
+    }
+
+    private Code codeableConceptToCode(CodeableConcept c) {
+        String system = c.getCodingFirstRep().getSystem();
+        String code = c.getCodingFirstRep().getCode();
+        String display = c.getCodingFirstRep().getDisplay();
+        return new Code(system, code, display);
+    }
+
+    private CodeableConcept codeToCodeableConcept(CodedMetadataType c) {
+        CodeableConcept concept = new CodeableConcept();
+        concept.addCoding()
+                .setSystem(c.getSchemeName())
+                .setCode(c.getCode())
+                .setDisplay(((LocalizedStringType) c.getDisplayName().getLocalizedString().get(0)).getValue());
+        return concept;
     }
 
     private boolean isSuccess(XDSStatusType status) {
@@ -243,8 +265,13 @@ public class XdsBackbone implements Backbone {
         }
 
 
+        // Date sometimes is in the format yyyyMMdd (instead of yyyyMMddhhmmss, so we append 0s to make it parse
+        StringBuilder date = new StringBuilder(entry.getCreationTime());
+        while (date.length() < 12)
+            date.append("0");
+
         try {
-            document.setIndexed(DATE_FORMAT.parse(entry.getCreationTime()));
+            document.setIndexed(DATE_FORMAT.parse(date.toString()));
         } catch (ParseException e) {
             log.error("Error parsing date", e);
             throw new InternalErrorException("Error parsing date", e);
@@ -263,6 +290,9 @@ public class XdsBackbone implements Backbone {
         }
 
         // TODO: document.addRelatesTo();
+
+        document.setType(codeToCodeableConcept(entry.getTypeCode()));
+        document.setClass_(codeToCodeableConcept(entry.getClassCode()));
         // TODO: document.setType(entry.getTypeCode()???);
         // TODO: document.setClass_(entry.getClassCode()???);
         // TODO: document.addAuthor().setReference(entry.getAuthors()???);
