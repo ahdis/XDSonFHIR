@@ -78,9 +78,9 @@ public class XdsOnFhir extends RestfulServer {
 
         try {
             Backbone backbone = new XdsBackbone(
-                    new URI("http://ihexds.nist.gov:12090/tf6/services/xdsrepositoryb"),
-                    new URI("http://ihexds.nist.gov:12090/tf6/services/xdsregistryb"),
-                    new URI("http://ihexds.nist.gov:12090/tf6/services/xdsrepositoryb"),
+                    new URI("http://hit-dev.nist.gov:12093/xdstools4/sim/default__lili/rep/prb"),
+                    new URI("http://hit-dev.nist.gov:12093/xdstools4/sim/default__lili/reg/sq"),
+                    new URI("http://hit-dev.nist.gov:12093/xdstools4/sim/default__lili/reg/ret"),
                     "1.3.6.1.4.1.21367.101");
 
             Provider provider = new Provider(backbone);
