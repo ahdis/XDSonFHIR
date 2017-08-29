@@ -55,3 +55,10 @@ Then, run a container by attaching port 8000 to a port on your local machine, e.
 ```
 docker run --rm -p 8000:8000 xds-on-fhir
 ```
+
+## Running the full stack (xds-on-fhir + fhir-webapp + xdstools-docker)
+This project is made to work with the [web app](https://github.com/ahdis/fhir-webapp) and [xds-tools](https://github.com/ahdis/fhir-webapp)). Both can be run with Docker. Simply follow the instructions for building and running a Docker container for each of the 2 projects. This project is configured for working well with both out of the box. For xds-tools, you additionally need to create a "Document Repository/Registry" named "ahdis" by browsing to http://localhost:8080/xdstools4/ and choosing "Simulators" on the left.
+
+If you are running this project as a Docker container too, you will need to change the repository URLs from `localhost` to the IP of the xdstools Docker container.
+
+For examples of more advanced Docker usages, see README in the docker folder.

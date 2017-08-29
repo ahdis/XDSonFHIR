@@ -1,0 +1,28 @@
+version: '2'
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  xdstools:
+    image: xdstools
+    environment:
+      - VIRTUAL_PORT=8080
+      - VIRTUAL_HOST=xdstools.127.0.0.1.nip.io
+    volumes:
+      - ./cache:/Users/bill/tmp/toolkit2a/
+
+  fhir-webapp:
+    image: fhir-webapp
+    environment:
+      - VIRTUAL_PORT=8100
+      - VIRTUAL_HOST=app.127.0.0.1.nip.io
+
+  xds-on-fhir:
+    build: ..
+    environment:
+      - VIRTUAL_PORT=8000
+      - VIRTUAL_HOST=server.127.0.0.1.nip.io
