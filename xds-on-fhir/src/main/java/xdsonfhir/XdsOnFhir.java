@@ -33,7 +33,7 @@ public class XdsOnFhir extends RestfulServer {
     }
 
     public static Tomcat getTomcat() throws LifecycleException {
-        return getTomcat(8080);
+        return getTomcat(8000);
     }
 
     public static Tomcat getTomcat(int port) throws LifecycleException {
@@ -78,9 +78,9 @@ public class XdsOnFhir extends RestfulServer {
 
         try {
             Backbone backbone = new XdsBackbone(
-                    new URI("http://hit-dev.nist.gov:12093/xdstools4/sim/default__lili/rep/prb"),
-                    new URI("http://hit-dev.nist.gov:12093/xdstools4/sim/default__lili/reg/sq"),
-                    new URI("http://hit-dev.nist.gov:12093/xdstools4/sim/default__lili/reg/ret"),
+                    new URI("http://localhost:8888/xdstools4/sim/default__ahdis/rep/prb"),
+                    new URI("http://localhost:8888/xdstools4/sim/default__ahdis/reg/sq"),
+                    new URI("http://localhost:8888/xdstools4/sim/default__ahdis/reg/ret"),
                     "1.3.6.1.4.1.21367.101");
 
             Provider provider = new Provider(backbone);

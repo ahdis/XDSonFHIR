@@ -34,24 +34,24 @@ And run it:
 java -jar target/xds-on-fhir-1.0-SNAPSHOT.jar
 ```
 
-Check that the server is running by opening http://localhost:8080/fhir/status in your browser.
+Check that the server is running by opening http://localhost:8000/fhir/status in your browser.
 
 # Customizing
 
-By default, the embedded Tomcat server starts on port 8080, it can be changed in `XdsOnFhir.java`.
+By default, the embedded Tomcat server starts on port 8000, it can be changed in `XdsOnFhir.java`.
 
 The XDS URLs can be changed in `XdsOnFhir.java` too, in method `initialize()`
 
 
 ## Deploy with Docker
-This app can also be deployed in a Docker container with the provided Dockerfile. Docker will build the app inside the container, and then run the embedded Tomcat server on port 8080.
+This app can also be deployed in a Docker container with the provided Dockerfile. Docker will build the app inside the container, and then run the embedded Tomcat server on port 8000.
 
 First, the image must be built:
 ```bash
 docker build -t xds-on-fhir .
 ```
 
-Then, run a container by attaching port 8080 to a port on your local machine, e.g.:
+Then, run a container by attaching port 8000 to a port on your local machine, e.g.:
 ```
-docker run --rm -p 8080:8080 xds-on-fhir
+docker run --rm -p 8000:8000 xds-on-fhir
 ```
