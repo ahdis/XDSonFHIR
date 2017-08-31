@@ -12,7 +12,7 @@ Then, in `xds-on-fhir`, in the file `XdsOnFhir.java`, the repository URLs need t
 
 In `fhir-webapp` you will also need to set the backend URL to xds-on-fhir's URL. Either change the value of `DEFAULT_URL` in `src/providers/fhir/fhir.ts` to `server.YOUR-DOMAIN.com/fhir/` or change it through the "Settings" menu (if you do it this way, it will have to be done by each end-user of the app).
 
-Finally, you can build the Docker images for [fhir-webapp](https://github.com/ahdis/fhir-webapp) and [xds-tools-docker](https://github.com/ahdis/fhir-webapp)) (see the respective repos for instructions).
+Finally, you can build the Docker images for [fhir-webapp](https://github.com/ahdis/fhir-webapp) and [xds-tools-docker](https://github.com/ahdis/xdstools-docker) (see the respective repos for instructions).
 
 Once all of this is done, run the service like this:
 ```bash
